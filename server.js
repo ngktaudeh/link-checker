@@ -5,7 +5,7 @@ const app = express();
 const PORT = process.env.PORT || 3456;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'docs')));
 
 // ── Helpers ────────────────────────────────────────────────────────
 
