@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Link Checker - Deteksi Gambar Error</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0a0a0f;
+    color: #e0e0e0;
+    min-height: 100vh;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0;
+    background-image: radial-gradient(circle, #1a1a2e 1px, transparent 1px);
+    background-size: 28px 28px;
+    opacity: 0.4;
+  }
+  .container { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 24px 20px 80px; }
+
+  /* Header */
+  header { text-align: center; padding: 40px 0 32px; }
+  header h1 { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  header p { color: #888; margin-top: 8px; font-size: 0.95rem; }
+
+  /* Input card */
+  .input-card {
+    background: #14141f; border: 1px solid #252540; border-radius: 16px; padding: 28px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    margin-bottom: 28px;
+  }
+  .input-row { display: flex; gap: 12px; }
+  .input-row input {
+    flex: 1; padding: 14px 18px; border-radius: 12px; border: 1px solid #2a2a45;
+    background: #0d0d16; color: #e0e0e0; font-size: 1rem; outline: none;
+    transition: border-color .2s;
+  }
+  .input-row input:focus { border-color: #6366f1; }
+  .input-row input::placeholder { color: #555; }
+  .input-row button {
+    padding: 14px 28px; border-radius: 12px; border: none;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+    white-space: nowrap;
+  }
+  .input-row button:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(99,102,241,.4); }
+  .input-row button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .recent-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .recent-links span { font-size: 0.8rem; color: #666; }
+  .recent-links a { font-size: 0.8rem; color: #6366f1; cursor: pointer; text-decoration: none; }
+  .recent-links a:hover { text-decoration: underline; }
+
+  /* Loading */
+  .loading { display: none; text-align: center; padding: 40px 0; }
+  .loading.active { display: block; }
+  .spinner {
+    width: 48px; height: 48px; border: 3px solid #252540;
+    border-top-color: #6366f1; border-radius: 50%; animation: spin .7s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { color: #888; font-size: 0.9rem; }
+
+  .progress-bar-wrap { margin-top: 16px; background: #1a1a2e; border-radius: 8px; height: 6px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, #6366f1, #a855f7); width: 0%; transition: width .3s; border-radius: 8px; }
+
+  /* Error */
+  .error-box { display: none; background: #1f1315; border: 1px solid #4a1a1a; border-radius: 12px; padding: 18px 22px; margin-bottom: 24px; color: #f87171; }
+  .error-box strong { display: block; margin-bottom: 4px; }
+
+  /* Results */
+  .results { display: none; }
+  .results.active { display: block; }
+
+  .stats-row { display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+  .stat-card {
+    flex: 1; min-width: 120px; background: #14141f; border: 1px solid #252540;
+    border-radius: 14px; padding: 20px; text-align: center;
+  }
+  .stat-card .num { font-size: 2rem; font-weight: 800; }
+  .stat-card .lbl { font-size: 0.8rem; color: #777; margin-top: 4px; }
+  .stat-card.total .num { color: #e0e0e0; }
+  .stat-card.ok .num { color: #22c55e; }
+  .stat-card.broken .num { color: #ef4444; }
+  .stat-card.warn .num { color: #f59e0b; }
+
+  .page-status {
+    background: #14141f; border: 1px solid #252540; border-radius: 12px;
+    padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+    font-size: 0.9rem;
+  }
+  .page-status .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .page-status .dot.green { background: #22c55e; }
+  .page-status .dot.red { background: #ef4444; }
+  .page-status .dot.yellow { background: #f59e0b; }
+
+  /* Image list */
+  .image-list { display: flex; flex-direction: column; gap: 8px; }
+  .image-item {
+    background: #14141f; border: 1px solid #252540; border-radius: 12px;
+    padding: 14px 18px; display: flex; align-items: center; gap: 14px;
+    transition: border-color .2s;
+  }
+  .image-item:hover { border-color: #333355; }
+  .image-item.broken { border-left: 3px solid #ef4444; }
+  .image-item.warn { border-left: 3px solid #f59e0b; }
+  .image-item.ok { border-left: 3px solid #22c55e; }
+
+  .status-badge {
+    font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+    white-space: nowrap; flex-shrink: 0; min-width: 72px; text-align: center;
+  }
+  .status-badge.ok { background: #0f2a1a; color: #22c55e; }
+  .status-badge.error { background: #2a1010; color: #ef4444; }
+  .status-badge.warn { background: #2a2008; color: #f59e0b; }
+
+  .img-thumb {
+    width: 44px; height: 44px; border-radius: 8px; object-fit: cover;
+    background: #1a1a2e; flex-shrink: 0; border: 1px solid #252540;
+  }
+  .img-thumb.placeholder { display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+  .img-info { flex: 1; min-width: 0; }
+  .img-info .img-url {
+    font-size: 0.82rem; color: #aaa; word-break: break-all;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    line-height: 1.4;
+  }
+  .img-info .img-meta { font-size: 0.72rem; color: #555; margin-top: 3px; }
+
+  .img-actions { flex-shrink: 0; }
+  .img-actions a {
+    color: #6366f1; text-decoration: none; font-size: 0.8rem;
+    padding: 6px 12px; border-radius: 8px; border: 1px solid #252540;
+    transition: background .15s;
+  }
+  .img-actions a:hover { background: #1a1a30; }
+
+  .empty-state { text-align: center; padding: 60px 0; color: #555; }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+
+  /* Filter tabs */
+  .filter-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-tab {
+    padding: 8px 16px; border-radius: 20px; border: 1px solid #252540;
+    background: transparent; color: #999; cursor: pointer; font-size: 0.82rem;
+    transition: all .15s;
+  }
+  .filter-tab:hover { border-color: #444; color: #ccc; }
+  .filter-tab.active { background: #1a1a35; border-color: #6366f1; color: #a5b4fc; }
+
+  footer { text-align: center; padding: 20px; color: #333; font-size: 0.75rem; }
+
+  @media (max-width: 640px) {
+    .input-row { flex-direction: column; }
+    header h1 { font-size: 1.6rem; }
+    .stats-row { gap: 8px; }
+    .stat-card { padding: 14px; }
+    .stat-card .num { font-size: 1.4rem; }
+    .image-item { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="container">
+  <header>
+    <h1>🔍 Link Checker</h1>
+    <p>Cek gambar error, bug, atau rusak di halaman web — tinggal tempel link</p>
+  </header>
+
+  <div class="input-card">
+    <div class="input-row">
+      <input type="text" id="urlInput" placeholder="Tempel URL di sini… contoh: https://example.com" autofocus>
+      <button id="checkBtn" onclick="doCheck()">🔍 Cek Sekarang</button>
+    </div>
+    <div class="recent-links" id="recentLinks"><span>Terakhir:</span></div>
+  </div>
+
+  <div class="error-box" id="errorBox"><strong id="errorTitle">Error</strong><span id="errorMsg"></span></div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p id="loadingText">Mengambil halaman…</p>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="page-status" id="pageStatus"></div>
+    <div class="stats-row" id="statsRow"></div>
+    <div class="filter-tabs" id="filterTabs"></div>
+    <div class="image-list" id="imageList"></div>
+    <div class="empty-state" id="emptyState"><div class="icon">📭</div><p>Tidak ada gambar ditemukan di halaman ini</p></div>
+  </div>
+</div>
+<footer>Link Checker ⚔️ — by Buk</footer>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+
+let allResults = [];
+let currentFilter = 'all';
+let recents = JSON.parse(localStorage.getItem('lc_recents') || '[]');
+
+function renderRecents() {
+  const el = $('#recentLinks');
+  if (!recents.length) { el.innerHTML = '<span>Belum ada riwayat</span>'; return; }
+  el.innerHTML = '<span>Terakhir:</span> ' + recents.slice(0, 8).map((u,i) =>
+    `<a onclick="loadRecent('${u.replace(/'/g,"\\'")}')">${truncateUrl(u, 40)}</a>`
+  ).join(' · ');
+}
+
+function addRecent(url) {
+  recents = [url, ...recents.filter(u => u !== url)].slice(0, 20);
+  localStorage.setItem('lc_recents', JSON.stringify(recents));
+  renderRecents();
+}
+
+function loadRecent(url) { $('#urlInput').value = url; doCheck(); }
+function truncateUrl(u, max) { return u.length > max ? u.slice(0, max) + '…' : u; }
+
+function hide(id) { $(id).classList.remove('active'); }
+function show(id) { $(id).classList.add('active'); }
+
+function setLoading(show_, text) {
+  const el = $('#loading');
+  if (show_) { el.classList.add('active'); $('#loadingText').textContent = text || 'Memeriksa…'; }
+  else el.classList.remove('active');
+}
+
+async function doCheck() {
+  const raw = $('#urlInput').value.trim();
+  if (!raw) return;
+
+  hide('results'); hide('errorBox');
+  $('#checkBtn').disabled = true;
+  setLoading(true, 'Mengambil halaman…');
+  $('#progressBar').style.width = '10%';
+
+  let url = raw;
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+
+  try {
+    const resp = await fetch('/api/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: 'Gagal menghubungi server' }));
+      throw new Error(err.error || `HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    $('#progressBar').style.width = '100%';
+
+    if (data.pageError) {
+      showError('Halaman tidak bisa diakses', data.pageError);
+      setLoading(false);
+      $('#checkBtn').disabled = false;
+      return;
+    }
+
+    allResults = data.images || [];
+    addRecent(data.url);
+    renderResults(data);
+    setLoading(false);
+
+  } catch (err) {
+    showError('Gagal', err.message);
+    setLoading(false);
+  }
+  $('#checkBtn').disabled = false;
+}
+
+function showError(title, msg) {
+  $('#errorTitle').textContent = title;
+  $('#errorMsg').textContent = msg;
+  show('errorBox');
+}
+
+function renderResults(data) {
+  hide('errorBox');
+  show('results');
+
+  // Page status
+  const ps = $('#pageStatus');
+  const psDot = data.pageStatus >= 200 && data.pageStatus < 400 ? 'green' : 'red';
+  ps.innerHTML = `<span class="dot ${psDot}"></span> Halaman: <strong>${data.url}</strong> → Status ${data.pageStatus || '?'}`;
+
+  // Stats
+  $('#statsRow').innerHTML = `
+    <div class="stat-card total"><div class="num">${data.totalImages}</div><div class="lbl">Total Gambar</div></div>
+    <div class="stat-card ok"><div class="num">${data.ok}</div><div class="lbl">✅ OK</div></div>
+    <div class="stat-card broken"><div class="num">${data.broken}</div><div class="lbl">❌ Rusak</div></div>
+    <div class="stat-card warn"><div class="num">${data.warn}</div><div class="lbl">⚠️ Warning</div></div>
+  `;
+
+  // Filter tabs
+  $('#filterTabs').innerHTML = `
+    <button class="filter-tab active" onclick="setFilter('all')">Semua (${data.totalImages})</button>
+    <button class="filter-tab" onclick="setFilter('ok')">✅ OK (${data.ok})</button>
+    <button class="filter-tab" onclick="setFilter('error')">❌ Rusak (${data.broken})</button>
+    <button class="filter-tab" onclick="setFilter('warn')">⚠️ Warning (${data.warn})</button>
+  `;
+
+  renderImageList();
+
+  if (data.totalImages === 0) {
+    $('#emptyState').style.display = 'block';
+    $('#imageList').innerHTML = '';
+  } else {
+    $('#emptyState').style.display = 'none';
+  }
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  $$('.filter-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.filter-tab:nth-child(${f === 'all' ? 1 : f === 'ok' ? 2 : f === 'error' ? 3 : 4})`)?.classList.add('active');
+  renderImageList();
+}
+
+function renderImageList() {
+  const filtered = currentFilter === 'all' ? allResults : allResults.filter(r => r.cls === currentFilter);
+  const list = $('#imageList');
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>Tidak ada hasil untuk filter ini</p></div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map((img, i) => {
+    const sizeText = img.contentLength ? formatSize(img.contentLength) : '';
+    const meta = [img.source, sizeText, img.contentType?.split(';')[0]].filter(Boolean).join(' · ');
+    const thumbHtml = img.cls === 'ok'
+      ? `<img class="img-thumb" src="${escHtml(img.url)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'img-thumb placeholder\\'>🖼️</div>'">`
+      : `<div class="img-thumb placeholder">${img.icon}</div>`;
+
+    return `
+      <div class="image-item ${img.cls}" style="animation-delay:${i*0.03}s">
+        ${thumbHtml}
+        <div class="img-info">
+          <div class="img-url">${escHtml(img.url)}</div>
+          <div class="img-meta">${meta}${img.redirectedUrl ? ` → ${escHtml(truncateUrl(img.redirectedUrl, 50))}` : ''}</div>
+          ${img.error ? `<div class="img-meta" style="color:#f87171">${escHtml(img.error)}</div>` : ''}
+        </div>
+        <span class="status-badge ${img.cls}">${img.label}</span>
+        <div class="img-actions"><a href="${escHtml(img.url)}" target="_blank" rel="noopener">Buka ↗</a></div>
+      </div>`;
+  }).join('');
+}
+
+function formatSize(bytes) {
+  if (!bytes || bytes <= 0) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// Enter key
+$('#urlInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doCheck();
+});
+
+renderRecents();
+</script>
+</body>
+</html>

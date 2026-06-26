@@ -1,0 +1,12 @@
+{
+  "name": "link-checker",
+  "version": "1.0.0",
+  "description": "Cek link - deteksi gambar error/bug/rusak di halaman web",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
