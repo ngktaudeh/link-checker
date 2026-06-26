@@ -3,153 +3,158 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Link Checker - Deteksi Gambar Error</title>
+<title>Link Checker — Audit Halaman ala PageSpeed</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #0a0a0f;
-    color: #e0e0e0;
-    min-height: 100vh;
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#08080f;color:#d4d4d8;min-height:100vh;line-height:1.5;
   }
-  .bg-grid {
-    position: fixed; inset: 0; z-index: 0;
-    background-image: radial-gradient(circle, #1a1a2e 1px, transparent 1px);
-    background-size: 28px 28px;
-    opacity: 0.4;
-  }
-  .container { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 24px 20px 80px; }
-
-  header { text-align: center; padding: 40px 0 32px; }
-  header h1 { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  header p { color: #888; margin-top: 8px; font-size: 0.95rem; }
-
-  .input-card {
-    background: #14141f; border: 1px solid #252540; border-radius: 16px; padding: 28px;
-    box-shadow: 0 8px 32px rgba(0,0,0,.4); margin-bottom: 28px;
-  }
-  .input-row { display: flex; gap: 12px; }
-  .input-row input {
-    flex: 1; padding: 14px 18px; border-radius: 12px; border: 1px solid #2a2a45;
-    background: #0d0d16; color: #e0e0e0; font-size: 1rem; outline: none;
-    transition: border-color .2s;
-  }
-  .input-row input:focus { border-color: #6366f1; }
-  .input-row input::placeholder { color: #555; }
-  .input-row button {
-    padding: 14px 28px; border-radius: 12px; border: none;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer;
-    transition: transform .15s, box-shadow .15s; white-space: nowrap;
-  }
-  .input-row button:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(99,102,241,.4); }
-  .input-row button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-
-  .recent-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-  .recent-links span { font-size: 0.8rem; color: #666; }
-  .recent-links a { font-size: 0.8rem; color: #6366f1; cursor: pointer; text-decoration: none; }
-  .recent-links a:hover { text-decoration: underline; }
-
-  .loading { display: none; text-align: center; padding: 40px 0; }
-  .loading.active { display: block; }
-  .spinner {
-    width: 48px; height: 48px; border: 3px solid #252540;
-    border-top-color: #6366f1; border-radius: 50%; animation: spin .7s linear infinite;
-    margin: 0 auto 16px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading p { color: #888; font-size: 0.9rem; }
-
-  .progress-bar-wrap { margin-top: 16px; background: #1a1a2e; border-radius: 8px; height: 6px; overflow: hidden; }
-  .progress-bar { height: 100%; background: linear-gradient(90deg, #6366f1, #a855f7); width: 0%; transition: width .3s; border-radius: 8px; }
-
-  .error-box { display: none; background: #1f1315; border: 1px solid #4a1a1a; border-radius: 12px; padding: 18px 22px; margin-bottom: 24px; color: #f87171; }
-  .error-box strong { display: block; margin-bottom: 4px; }
-
-  .results { display: none; }
-  .results.active { display: block; }
-
-  .stats-row { display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
-  .stat-card {
-    flex: 1; min-width: 110px; background: #14141f; border: 1px solid #252540;
-    border-radius: 14px; padding: 20px 16px; text-align: center;
-  }
-  .stat-card .num { font-size: 2rem; font-weight: 800; }
-  .stat-card .lbl { font-size: 0.75rem; color: #777; margin-top: 4px; }
-  .stat-card.total .num { color: #e0e0e0; }
-  .stat-card.ok .num { color: #22c55e; }
-  .stat-card.broken .num { color: #ef4444; }
-  .stat-card.warn .num { color: #f59e0b; }
-
-  .page-status {
-    background: #14141f; border: 1px solid #252540; border-radius: 12px;
-    padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
-    font-size: 0.9rem; word-break: break-all;
+  .bg-grid{
+    position:fixed;inset:0;z-index:0;
+    background-image:radial-gradient(circle,#13132a 1px,transparent 1px);
+    background-size:32px 32px;opacity:.35;
   }
 
-  .filter-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-  .filter-tab {
-    padding: 8px 16px; border-radius: 20px; border: 1px solid #252540;
-    background: transparent; color: #999; cursor: pointer; font-size: 0.82rem;
-    transition: all .15s;
+  .container{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:20px 20px 80px}
+
+  /* ── Header ── */
+  header{text-align:center;padding:44px 0 24px}
+  header .logo{font-size:3rem}
+  header h1{font-size:2.2rem;font-weight:800;background:linear-gradient(135deg,#6366f1,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  header p{color:#71717a;margin-top:6px;font-size:.92rem}
+
+  /* ── Input ── */
+  .input-card{
+    background:#111122;border:1px solid #1e1e3a;border-radius:18px;padding:24px 28px;
+    box-shadow:0 8px 40px rgba(0,0,0,.5);margin-bottom:32px;
   }
-  .filter-tab:hover { border-color: #444; color: #ccc; }
-  .filter-tab.active { background: #1a1a35; border-color: #6366f1; color: #a5b4fc; }
-
-  .image-list { display: flex; flex-direction: column; gap: 8px; }
-  .image-item {
-    background: #14141f; border: 1px solid #252540; border-radius: 12px;
-    padding: 14px 18px; display: flex; align-items: center; gap: 14px;
-    transition: border-color .2s; animation: fadeIn .3s ease both;
+  .input-row{display:flex;gap:10px}
+  .input-row input{
+    flex:1;padding:15px 20px;border-radius:14px;border:1px solid #272750;
+    background:#0a0a1a;color:#e4e4e7;font-size:1rem;outline:none;transition:border-color .2s;
   }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .image-item:hover { border-color: #333355; }
-  .image-item.broken { border-left: 3px solid #ef4444; }
-  .image-item.warn { border-left: 3px solid #f59e0b; }
-  .image-item.ok { border-left: 3px solid #22c55e; }
-
-  .status-badge {
-    font-size: 0.68rem; font-weight: 700; padding: 4px 10px; border-radius: 20px;
-    white-space: nowrap; flex-shrink: 0; min-width: 72px; text-align: center;
+  .input-row input:focus{border-color:#6366f1}
+  .input-row input::placeholder{color:#3f3f5c}
+  .input-row button{
+    padding:15px 32px;border-radius:14px;border:none;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
+    font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;
+    transition:transform .15s,box-shadow .15s;
   }
-  .status-badge.ok { background: #0f2a1a; color: #22c55e; }
-  .status-badge.error { background: #2a1010; color: #ef4444; }
-  .status-badge.warn { background: #2a2008; color: #f59e0b; }
+  .input-row button:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(99,102,241,.45)}
+  .input-row button:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
 
-  .img-thumb {
-    width: 44px; height: 44px; border-radius: 8px; object-fit: cover;
-    background: #1a1a2e; flex-shrink: 0; border: 1px solid #252540;
+  .recent-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .recent-links span,.recent-links a{font-size:.78rem}
+  .recent-links span{color:#525272}
+  .recent-links a{color:#818cf8;cursor:pointer;text-decoration:none}
+  .recent-links a:hover{text-decoration:underline}
+
+  /* ── Loading ── */
+  .loading{display:none;text-align:center;padding:50px 0}
+  .loading.active{display:block}
+  .spinner{width:52px;height:52px;border:3px solid #1e1e3a;border-top-color:#6366f1;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 18px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading p{color:#71717a;font-size:.88rem}
+  .progress-wrap{margin-top:18px;background:#1a1a35;border-radius:10px;height:8px;overflow:hidden;max-width:400px;margin-left:auto;margin-right:auto}
+  .progress-bar{height:100%;background:linear-gradient(90deg,#6366f1,#a855f7);width:0;transition:width .35s;border-radius:10px}
+
+  /* ── Error ── */
+  .error-box{display:none;background:#1f1116;border:1px solid #4a1520;border-radius:14px;padding:18px 24px;margin-bottom:24px;color:#fca5a5}
+  .error-box strong{display:block;margin-bottom:4px;color:#f87171}
+
+  /* ── Results ── */
+  .results{display:none}
+  .results.active{display:block}
+
+  /* ── Score Circle ── */
+  .score-section{text-align:center;padding:28px 0 20px}
+  .score-circle{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:140px;height:140px;border-radius:50%;position:relative;
+    background:conic-gradient(var(--score-color) calc(var(--score-pct)*1%), #1a1a35 0);
+    margin-bottom:12px;
   }
-  .img-thumb.placeholder { display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-
-  .img-info { flex: 1; min-width: 0; }
-  .img-info .img-url {
-    font-size: 0.82rem; color: #aaa; word-break: break-all;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    line-height: 1.4;
+  .score-inner{
+    width:108px;height:108px;border-radius:50%;background:#111122;
+    display:flex;align-items:center;justify-content:center;flex-direction:column;
   }
-  .img-info .img-meta { font-size: 0.72rem; color: #555; margin-top: 3px; }
+  .score-num{font-size:2.8rem;font-weight:800;color:var(--score-text,#e4e4e7);line-height:1}
+  .score-label{font-size:.7rem;color:#71717a;margin-top:2px}
+  .score-text{font-size:.88rem;color:var(--score-text,#e4e4e7);margin-top:6px;font-weight:600}
 
-  .img-actions { flex-shrink: 0; }
-  .img-actions a {
-    color: #6366f1; text-decoration: none; font-size: 0.8rem;
-    padding: 6px 12px; border-radius: 8px; border: 1px solid #252540;
-    transition: background .15s;
+  .score-breakdown{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+  .score-chip{
+    padding:8px 18px;border-radius:20px;font-size:.78rem;font-weight:600;
+    display:flex;align-items:center;gap:6px;
   }
-  .img-actions a:hover { background: #1a1a30; }
+  .score-chip.good{background:#0a2a1a;color:#4ade80}
+  .score-chip.warn{background:#2a2008;color:#fbbf24}
+  .score-chip.bad{background:#2a1010;color:#f87171}
 
-  .empty-state { text-align: center; padding: 60px 0; color: #555; }
-  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+  /* ── Section Cards ── */
+  .section{margin-bottom:24px}
+  .section-header{
+    display:flex;align-items:center;gap:12px;margin-bottom:14px;
+    padding-bottom:10px;border-bottom:1px solid #1e1e3a;
+  }
+  .section-header .icon{font-size:1.5rem}
+  .section-header h2{font-size:1.2rem;font-weight:700;color:#e4e4e7}
+  .section-header .count{font-size:.78rem;color:#525272;margin-left:auto}
 
-  footer { text-align: center; padding: 20px; color: #333; font-size: 0.75rem; }
+  .finding{
+    background:#111122;border:1px solid #1e1e3a;border-radius:12px;
+    padding:16px 20px;margin-bottom:8px;display:flex;gap:14px;align-items:flex-start;
+    transition:border-color .2s;animation:fadeIn .35s ease both;
+  }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .finding:hover{border-color:#2a2a50}
 
-  @media (max-width: 640px) {
-    .input-row { flex-direction: column; }
-    header h1 { font-size: 1.6rem; }
-    .stats-row { gap: 8px; }
-    .stat-card { padding: 14px 10px; }
-    .stat-card .num { font-size: 1.4rem; }
-    .image-item { flex-wrap: wrap; }
+  .finding .sev{
+    width:10px;height:10px;border-radius:50%;margin-top:6px;flex-shrink:0;
+  }
+  .finding .sev.error{background:#ef4444;box-shadow:0 0 8px #ef444480}
+  .finding .sev.warn{background:#f59e0b;box-shadow:0 0 8px #f59e0b80}
+  .finding .sev.ok{background:#22c55e;box-shadow:0 0 8px #22c55e80}
+  .finding .sev.info{background:#6366f1;box-shadow:0 0 8px #6366f180}
+
+  .finding .body{flex:1;min-width:0}
+  .finding .title{font-weight:700;color:#e4e4e7;margin-bottom:4px;font-size:.92rem}
+  .finding .desc{color:#71717a;font-size:.82rem;line-height:1.5}
+  .finding .desc code{
+    background:#1a1a35;padding:2px 7px;border-radius:5px;font-size:.78rem;
+    color:#a5b4fc;word-break:break-all;
+  }
+  .finding .detail{font-size:.76rem;color:#525272;margin-top:4px}
+
+  .finding .badge{
+    font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:14px;
+    white-space:nowrap;flex-shrink:0;
+  }
+  .finding .badge.error{background:#2a1010;color:#f87171}
+  .finding .badge.warn{background:#2a2008;color:#fbbf24}
+  .finding .badge.ok{background:#0a2a1a;color:#4ade80}
+  .finding .badge.info{background:#0a1a2a;color:#818cf8}
+
+  /* ── Image gallery in findings ── */
+  .img-preview-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .img-preview{
+    width:60px;height:60px;border-radius:8px;object-fit:cover;
+    background:#1a1a35;border:1px solid #272750;
+  }
+
+  .empty-section{text-align:center;padding:30px;color:#3f3f5c;font-size:.85rem}
+
+  footer{text-align:center;padding:20px;color:#272740;font-size:.72rem}
+
+  @media(max-width:640px){
+    .input-row{flex-direction:column}
+    header h1{font-size:1.5rem}
+    .score-circle{width:110px;height:110px}
+    .score-inner{width:82px;height:82px}
+    .score-num{font-size:2.2rem}
+    .finding{flex-wrap:wrap}
   }
 </style>
 </head>
@@ -157,345 +162,484 @@
 <div class="bg-grid"></div>
 <div class="container">
   <header>
-    <h1>🔍 Link Checker</h1>
-    <p>Cek gambar error, bug, atau rusak di halaman web — tinggal tempel link</p>
+    <div class="logo">🔍</div>
+    <h1>Link &amp; Page Auditor</h1>
+    <p>Audit halaman web — deteksi error, bug, dan masalah SEO/HTML ala PageSpeed</p>
   </header>
 
   <div class="input-card">
     <div class="input-row">
-      <input type="text" id="urlInput" placeholder="Tempel URL di sini… contoh: https://example.com" autofocus>
-      <button id="checkBtn" onclick="doCheck()">🔍 Cek Sekarang</button>
+      <input type="text" id="urlInput" placeholder="Tempel URL… contoh: https://example.com" autofocus>
+      <button id="checkBtn" onclick="doCheck()">🔍 Audit</button>
     </div>
     <div class="recent-links" id="recentLinks"><span>Belum ada riwayat</span></div>
   </div>
 
-  <div class="error-box" id="errorBox"><strong id="errorTitle">Error</strong><span id="errorMsg"></span></div>
+  <div class="error-box" id="errorBox"><strong id="errorTitle"></strong><span id="errorMsg"></span></div>
 
   <div class="loading" id="loading">
     <div class="spinner"></div>
     <p id="loadingText">Mengambil halaman…</p>
-    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
   </div>
 
   <div class="results" id="results">
-    <div class="page-status" id="pageStatus"></div>
-    <div class="stats-row" id="statsRow"></div>
-    <div class="filter-tabs" id="filterTabs"></div>
-    <div class="image-list" id="imageList"></div>
-    <div class="empty-state" id="emptyState"><div class="icon">📭</div><p>Tidak ada gambar ditemukan di halaman ini</p></div>
+    <div class="score-section" id="scoreSection"></div>
+    <div id="findingsContainer"></div>
   </div>
 </div>
-<footer>Link Checker ⚔️ — by Buk</footer>
+<footer>Link &amp; Page Auditor ⚔️ — by Buk</footer>
 
 <script>
-const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
 
-let allResults = [];
-let currentFilter = 'all';
-let recents = JSON.parse(localStorage.getItem('lc_recents') || '[]');
+let auditData=null;
+let recents=JSON.parse(localStorage.getItem('lc_recents')||'[]');
 
-// ── CORS Proxy (multiple fallbacks) ──────────────────────────────
-const PROXIES = [
-  (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+// ── CORS Proxies ───────────────────────────────
+const PROXIES=[
+  url=>`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url=>`https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
 ];
 
-async function fetchViaProxy(targetUrl, proxyIndex = 0) {
-  if (proxyIndex >= PROXIES.length) {
-    throw new Error('Semua CORS proxy gagal. Coba lagi nanti.');
-  }
-  const proxyUrl = PROXIES[proxyIndex](targetUrl);
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), 25000);
-  try {
-    const resp = await fetch(proxyUrl, { signal: controller.signal });
+async function fetchViaProxy(url,pi=0){
+  if(pi>=PROXIES.length)throw new Error('Semua proxy gagal. Coba lagi nanti.');
+  const c=new AbortController();
+  const t=setTimeout(()=>c.abort(),28000);
+  try{
+    const r=await fetch(PROXIES[pi](url),{signal:c.signal});
     clearTimeout(t);
-    if (!resp.ok) throw new Error(`Proxy HTTP ${resp.status}`);
-    return await resp.text();
-  } catch (err) {
+    if(!r.ok)throw new Error(`Proxy HTTP ${r.status}`);
+    return await r.text();
+  }catch(e){
     clearTimeout(t);
-    if (proxyIndex < PROXIES.length - 1) {
-      $('#loadingText').textContent = `Proxy ${proxyIndex + 1} gagal, coba proxy lain…`;
-      return fetchViaProxy(targetUrl, proxyIndex + 1);
-    }
-    throw err;
+    if(pi<PROXIES.length-1){$('#loadingText').textContent=`Proxy gagal, coba cadangan…`;return fetchViaProxy(url,pi+1);}
+    throw e;
   }
 }
 
-// ── URL helpers ─────────────────────────────────────────────────
-function resolveUrl(href, base) {
-  try { return new URL(href, base).href; } catch { return null; }
+function resolveUrl(href,base){try{return new URL(href,base).href}catch{return null}}
+
+// ── AUDIT ENGINE ───────────────────────────────
+
+function runAudit(html,baseUrl){
+  const findings={sections:[]};
+
+  // ── 1. IMAGES ──
+  const imgFindings=[];
+  const imgCandidates=extractAllImages(html,baseUrl);
+
+  // Count by source type
+  const srcCount=imgCandidates.filter(c=>c.source==='src').length;
+  const dataSrcCount=imgCandidates.filter(c=>c.source.startsWith('data-')).length;
+  const bgCount=imgCandidates.filter(c=>c.source==='bg-css').length;
+  const totalImgs=imgCandidates.length;
+
+  if(totalImgs===0){
+    imgFindings.push({sev:'info',title:'Tidak ada gambar ditemukan',desc:'Halaman ini tidak memiliki elemen gambar sama sekali.',badge:'INFO'});
+  }else{
+    imgFindings.push({sev:'ok',title:`${totalImgs} gambar terdeteksi`,desc:`${srcCount} dari <code>&lt;img src&gt;</code>, ${dataSrcCount} lazy-load, ${bgCount} dari CSS background.`,badge:'OK'});
+  }
+
+  // Check images without alt text
+  const imgsWithoutAlt=[...html.matchAll(/<img(?!\s+alt\s*=\s*["']\s*["'])(?!\s+alt\b)[^>]*?>/gi)];
+  const emptyAlt=[...html.matchAll(/<img[^>]*?\salt\s*=\s*["']\s*["'][^>]*?>/gi)];
+  if(imgsWithoutAlt.length>0){
+    imgFindings.push({sev:'warn',title:`${imgsWithoutAlt.length} gambar tanpa atribut alt`,desc:'Gambar tanpa <code>alt</code> buruk untuk aksesibilitas dan SEO. Screen reader tidak bisa mendeskripsikan gambar.',badge:'WARNING',count:imgsWithoutAlt.length});
+  }
+  if(emptyAlt.length>0){
+    imgFindings.push({sev:'info',title:`${emptyAlt.length} gambar dengan alt kosong`,desc:'Atribut <code>alt=""</code> ada tapi kosong — mungkin gambar dekoratif, pastikan memang disengaja.',badge:'INFO',count:emptyAlt.length});
+  }
+
+  // Images without width/height
+  const imgsNoDims=[...html.matchAll(/<img(?![^>]*\bwidth\b)(?![^>]*\bheight\b)[^>]*?>/gi)];
+  if(imgsNoDims.length>0){
+    imgFindings.push({sev:'warn',title:`${imgsNoDims.length} gambar tanpa width/height`,desc:'Gambar tanpa dimensi eksplisit bisa menyebabkan layout shift (CLS) saat loading.',badge:'WARNING',count:imgsNoDims.length});
+  }
+
+  findings.sections.push({id:'images',icon:'🖼️',title:'Gambar',findings:imgFindings,totalImgs,imgCandidates});
+
+  // ── 2. LINKS ──
+  const linkFindings=[];
+  const allLinks=[...html.matchAll(/<a\b[^>]*?\bhref\s*=\s*["']([^"']*)["'][^>]*?>/gi)];
+  const emptyLinks=allLinks.filter(m=>!m[1]||m[1]==='#'||m[1].startsWith('javascript:'));
+  const externalLinks=allLinks.filter(m=>{try{return new URL(m[1],baseUrl).origin!==new URL(baseUrl).origin}catch{return false}});
+  const internalLinks=allLinks.filter(m=>{try{return new URL(m[1],baseUrl).origin===new URL(baseUrl).origin}catch{return false}});
+
+  linkFindings.push({sev:'ok',title:`${allLinks.length} tautan ditemukan`,desc:`${internalLinks.length} internal, ${externalLinks.length} eksternal, ${emptyLinks.length} kosong/placeholder.`,badge:'OK'});
+
+  if(emptyLinks.length>0){
+    const examples=emptyLinks.slice(0,3).map(m=>`<code>href="${m[1]||'(kosong)'}"</code>`).join(', ');
+    linkFindings.push({sev:'warn',title:`${emptyLinks.length} tautan kosong / placeholder`,desc:`Tautan dengan href kosong, <code>#</code>, atau <code>javascript:void(0)</code>. Contoh: ${examples}`,badge:'WARNING',count:emptyLinks.length});
+  }
+
+  // Links without rel attribute for external
+  const extNoRel=externalLinks.filter(m=>!m[0].match(/\brel\s*=/i));
+  if(extNoRel.length>0){
+    linkFindings.push({sev:'info',title:`${extNoRel.length} tautan eksternal tanpa rel="noopener"`,desc:'Tautan ke domain lain sebaiknya pakai <code>rel="noopener noreferrer"</code> untuk keamanan.',badge:'INFO'});
+  }
+
+  findings.sections.push({id:'links',icon:'🔗',title:'Tautan',findings:linkFindings});
+
+  // ── 3. SEO ──
+  const seoFindings=[];
+
+  // Title
+  const titleMatch=html.match(/<title>([^<]*)<\/title>/i);
+  const titleText=titleMatch?titleMatch[1].trim():'';
+  if(!titleText){
+    seoFindings.push({sev:'error',title:'Halaman tidak memiliki tag &lt;title&gt;',desc:'Tag title wajib ada — ini yang muncul di tab browser dan hasil pencarian Google.',badge:'ERROR'});
+  }else if(titleText.length<10){
+    seoFindings.push({sev:'warn',title:`Title terlalu pendek (${titleText.length} karakter)`,desc:`Title: <code>${escHtml(titleText)}</code>. Idealnya 30-60 karakter.`,badge:'WARNING'});
+  }else if(titleText.length>70){
+    seoFindings.push({sev:'info',title:`Title terlalu panjang (${titleText.length} karakter)`,desc:`Title: <code>${escHtml(titleText.substring(0,80))}…</code>. Google biasanya memotong di ~60 karakter.`,badge:'INFO'});
+  }else{
+    seoFindings.push({sev:'ok',title:`Title OK (${titleText.length} karakter)`,desc:`<code>${escHtml(titleText)}</code>`,badge:'OK'});
+  }
+
+  // Meta description
+  const descMatch=html.match(/<meta[^>]*?name\s*=\s*["']description["'][^>]*?content\s*=\s*["']([^"']*)["']/i)
+    || html.match(/<meta[^>]*?content\s*=\s*["']([^"']*)["'][^>]*?name\s*=\s*["']description["']/i);
+  const descText=descMatch?descMatch[1].trim():'';
+  if(!descText){
+    seoFindings.push({sev:'warn',title:'Meta description tidak ditemukan',desc:'Tambahkan <code>&lt;meta name="description" content="…"&gt;</code> — ini muncul di snippet hasil Google.',badge:'WARNING'});
+  }else if(descText.length<50){
+    seoFindings.push({sev:'warn',title:`Meta description terlalu pendek (${descText.length} karakter)`,desc:'Idealnya 120-160 karakter agar snippet Google maksimal.',badge:'WARNING'});
+  }else if(descText.length>170){
+    seoFindings.push({sev:'info',title:`Meta description terlalu panjang (${descText.length} karakter)`,desc:'Google biasanya menampilkan ~155-160 karakter di snippet.',badge:'INFO'});
+  }else{
+    seoFindings.push({sev:'ok',title:`Meta description OK (${descText.length} karakter)`,desc:`<code>${escHtml(descText.substring(0,120))}…</code>`,badge:'OK'});
+  }
+
+  // Viewport
+  const hasViewport=/<meta[^>]*?name\s*=\s*["']viewport["']/i.test(html);
+  if(!hasViewport){
+    seoFindings.push({sev:'error',title:'Viewport meta tag tidak ada',desc:'Tambahkan <code>&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</code> untuk responsif di mobile.',badge:'ERROR'});
+  }else{
+    seoFindings.push({sev:'ok',title:'Viewport meta tag ada ✅',desc:'Halaman sudah mobile-friendly.',badge:'OK'});
+  }
+
+  // Canonical
+  const hasCanonical=/<link[^>]*?rel\s*=\s*["']canonical["']/i.test(html);
+  if(!hasCanonical){
+    seoFindings.push({sev:'info',title:'Canonical URL tidak ditemukan',desc:'Tambahkan <code>&lt;link rel="canonical" href="…"&gt;</code> untuk menghindari duplicate content.',badge:'INFO'});
+  }
+
+  // Open Graph
+  const hasOG=html.includes('og:title')||html.includes('og:image');
+  if(!hasOG){
+    seoFindings.push({sev:'info',title:'Open Graph tags tidak ditemukan',desc:'Tambahkan og:title, og:description, og:image agar tampilan share di sosmed bagus.',badge:'INFO'});
+  }else{
+    seoFindings.push({sev:'ok',title:'Open Graph tags ditemukan ✅',desc:'Halaman siap untuk social sharing.',badge:'OK'});
+  }
+
+  // Favicon
+  const hasFavicon=/<link[^>]*?rel\s*=\s*["'](?:icon|shortcut icon|apple-touch-icon)/i.test(html);
+  if(!hasFavicon){
+    seoFindings.push({sev:'info',title:'Favicon tidak ditemukan',desc:'Tambahkan favicon untuk branding di tab browser.',badge:'INFO'});
+  }
+
+  // H1 count
+  const h1Count=(html.match(/<h1[\s>]/gi)||[]).length;
+  if(h1Count===0){
+    seoFindings.push({sev:'warn',title:'Tidak ada tag H1',desc:'Setiap halaman sebaiknya punya satu <code>&lt;h1&gt;</code> sebagai judul utama.',badge:'WARNING'});
+  }else if(h1Count>1){
+    seoFindings.push({sev:'warn',title:`${h1Count} tag H1 ditemukan`,desc:'Idealnya hanya satu <code>&lt;h1&gt;</code> per halaman untuk SEO yang baik.',badge:'WARNING'});
+  }else{
+    seoFindings.push({sev:'ok',title:'H1 tunggal ✅',desc:'Struktur heading sudah optimal.',badge:'OK'});
+  }
+
+  // Robots
+  const hasRobots=/<meta[^>]*?name\s*=\s*["']robots["']/i.test(html);
+  if(hasRobots){
+    const robotsMatch=html.match(/<meta[^>]*?name\s*=\s*["']robots["'][^>]*?content\s*=\s*["']([^"']*)["']/i);
+    const robots=robotsMatch?robotsMatch[1]:'';
+    if(robots.includes('noindex')){
+      seoFindings.push({sev:'warn',title:'Halaman di-set noindex 🚫',desc:`Robots meta: <code>${robots}</code>. Halaman ini tidak akan muncul di hasil pencarian.`,badge:'WARNING'});
+    }
+  }
+
+  findings.sections.push({id:'seo',icon:'📈',title:'SEO & Meta',findings:seoFindings});
+
+  // ── 4. HTML STRUCTURE ──
+  const htmlFindings=[];
+
+  // DOCTYPE
+  if(!/<!doctype\s+html/i.test(html)){
+    htmlFindings.push({sev:'error',title:'DOCTYPE tidak ditemukan',desc:'Tambahkan <code>&lt;!DOCTYPE html&gt;</code> di baris pertama agar browser render di standards mode.',badge:'ERROR'});
+  }
+
+  // Lang attribute
+  if(!/<html[^>]*\slang\s*=/i.test(html)){
+    htmlFindings.push({sev:'warn',title:'Atribut lang tidak ada di &lt;html&gt;',desc:'Tambahkan <code>lang="id"</code> atau sesuai bahasa halaman untuk aksesibilitas.',badge:'WARNING'});
+  }
+
+  // Charset
+  if(!/<meta[^>]*charset/i.test(html)){
+    htmlFindings.push({sev:'warn',title:'Meta charset tidak ditemukan',desc:'Tambahkan <code>&lt;meta charset="UTF-8"&gt;</code> di dalam <head>.',badge:'WARNING'});
+  }
+
+  // Forms without labels
+  const formInputs=[...html.matchAll(/<(?:input|select|textarea)\b(?![^>]*\bid\s*=)[^>]*?>/gi)];
+  if(formInputs.length>0){
+    htmlFindings.push({sev:'warn',title:`${formInputs.length} input form tanpa id`,desc:'Input form sebaiknya punya <code>id</code> dan <code>&lt;label&gt;</code> terkait untuk aksesibilitas.',badge:'WARNING'});
+  }
+
+  // Script tags in head without defer/async
+  const headMatch=html.match(/<head>([\s\S]*?)<\/head>/i);
+  if(headMatch){
+    const headScripts=[...headMatch[1].matchAll(/<script\b(?![^>]*\b(?:defer|async)\b)[^>]*?\bsrc\s*=[^>]*?>/gi)];
+    if(headScripts.length>0){
+      htmlFindings.push({sev:'warn',title:`${headScripts.length} script blocking di &lt;head&gt;`,desc:'Script tanpa <code>defer</code> atau <code>async</code> di head memblokir render. Tambahkan atribut tersebut.',badge:'WARNING'});
+    }
+  }
+
+  // Heading hierarchy
+  const headings={
+    h1:(html.match(/<h1[\s>]/gi)||[]).length,
+    h2:(html.match(/<h2[\s>]/gi)||[]).length,
+    h3:(html.match(/<h3[\s>]/gi)||[]).length,
+    h4:(html.match(/<h4[\s>]/gi)||[]).length,
+  };
+  if(headings.h2>0&&headings.h1===0){
+    htmlFindings.push({sev:'warn',title:'H2 ada tapi tidak ada H1',desc:'Heading hierarchy lompat — ada <code>&lt;h2&gt;</code> tanpa <code>&lt;h1&gt;</code>.',badge:'WARNING'});
+  }
+  if(headings.h3>0&&headings.h2===0){
+    htmlFindings.push({sev:'info',title:'H3 ada tapi tidak ada H2',desc:`Heading hierarchy tidak rapi: H1=${headings.h1}, H2=${headings.h2}, H3=${headings.h3}.`,badge:'INFO'});
+  }
+
+  // Inline styles count
+  const inlineStyles=(html.match(/\sstyle\s*=\s*["']/gi)||[]).length;
+  if(inlineStyles>10){
+    htmlFindings.push({sev:'info',title:`${inlineStyles} inline style ditemukan`,desc:'Sebaiknya ekstrak ke CSS eksternal untuk maintainability yang lebih baik.',badge:'INFO'});
+  }
+
+  if(htmlFindings.length===0){
+    htmlFindings.push({sev:'ok',title:'Struktur HTML OK ✅',desc:'Tidak ditemukan masalah struktural yang signifikan.',badge:'OK'});
+  }
+  findings.sections.push({id:'html',icon:'🏗️',title:'Struktur HTML',findings:htmlFindings});
+
+  // ── 5. PERFORMANCE HINTS ──
+  const perfFindings=[];
+  const pageSize=html.length;
+  perfFindings.push({sev:'info',title:`Ukuran halaman: ${fmtSize(pageSize)}`,desc:`HTML mentah sebesar ${pageSize.toLocaleString()} bytes.`,badge:'INFO'});
+
+  // Count total resources
+  const scripts=(html.match(/<script\b/gi)||[]).length;
+  const stylesheets=(html.match(/<link[^>]*?rel\s*=\s*["']stylesheet["']/gi)||[]).length;
+  const totalImports=scripts+stylesheets;
+  if(totalImports>20){
+    perfFindings.push({sev:'warn',title:`${totalImports} resource eksternal (${scripts} JS + ${stylesheets} CSS)`,desc:'Terlalu banyak request HTTP bisa memperlambat loading.',badge:'WARNING'});
+  }else if(totalImports>0){
+    perfFindings.push({sev:'ok',title:`${scripts} script + ${stylesheets} stylesheet`,desc:'Jumlah resource eksternal masih wajar.',badge:'OK'});
+  }
+
+  // Google Fonts / external fonts
+  const googleFonts=[...html.matchAll(/fonts\.googleapis\.com/gi)];
+  if(googleFonts.length>0){
+    perfFindings.push({sev:'info',title:`${googleFonts.length} Google Font terdeteksi`,desc:'Google Fonts bisa memperlambat render. Pertimbangkan <code>font-display: swap</code>.',badge:'INFO'});
+  }
+
+  // Preload hints
+  const hasPreload=/<link[^>]*?rel\s*=\s*["']preload["']/i.test(html);
+  if(!hasPreload&&totalImports>5){
+    perfFindings.push({sev:'info',title:'Tidak ada preload hint',desc:'Pertimbangkan <code>&lt;link rel="preload"&gt;</code> untuk resource kritis.',badge:'INFO'});
+  }
+
+  findings.sections.push({id:'perf',icon:'⚡',title:'Performa',findings:perfFindings});
+
+  // ── Calculate Score ──
+  const allF=findings.sections.flatMap(s=>s.findings);
+  const errCount=allF.filter(f=>f.sev==='error').length;
+  const warnCount=allF.filter(f=>f.sev==='warn').length;
+  const okCount=allF.filter(f=>f.sev==='ok').length;
+  const infoCount=allF.filter(f=>f.sev==='info').length;
+
+  const totalChecks=errCount*3+warnCount*2+infoCount*1+okCount*0;
+  const maxPenalty=(errCount+warnCount+infoCount+okCount)*3;
+  const score=totalChecks>0?Math.max(0,Math.round(100-(totalChecks/maxPenalty)*100)):100;
+
+  findings.score=score;
+  findings.summary={errCount,warnCount,okCount,infoCount,totalImgs,allLinks:allLinks.length};
+
+  return findings;
 }
 
-// ── Extract image URLs from HTML ────────────────────────────────
-function extractImageUrls(html, baseUrl) {
-  const seen = new Set();
-  const candidates = [];
-
-  // <img src>
-  for (const m of html.matchAll(/<img[^>]+?src\s*=\s*["']([^"']+)["']/gi)) {
-    const u = resolveUrl(m[1], baseUrl);
-    if (u && !seen.has(u)) { seen.add(u); candidates.push({ url: u, source: 'src' }); }
+// ── Extract all image URLs ──
+function extractAllImages(html,baseUrl){
+  const seen=new Set();
+  const out=[];
+  const add=(url,src)=>{const u=resolveUrl(url,baseUrl);if(u&&!seen.has(u)){seen.add(u);out.push({url:u,source:src})}};
+  for(const m of html.matchAll(/<img[^>]+?src\s*=\s*["']([^"']+)["']/gi))add(m[1],'src');
+  for(const m of html.matchAll(/<img[^>]+?srcset\s*=\s*["']([^"']+)["']/gi))for(const p of m[1].split(','))add(p.trim().split(/\s+/)[0],'srcset');
+  for(const a of['data-src','data-original','data-lazy-src']){
+    const re=new RegExp(`<img[^>]+?${a}\\s*=\\s*["']([^"']+)["']`,'gi');
+    for(const m of html.matchAll(re))add(m[1],a);
   }
-  // <img srcset>
-  for (const m of html.matchAll(/<img[^>]+?srcset\s*=\s*["']([^"']+)["']/gi)) {
-    for (const part of m[1].split(',')) {
-      const u = resolveUrl(part.trim().split(/\s+/)[0], baseUrl);
-      if (u && !seen.has(u)) { seen.add(u); candidates.push({ url: u, source: 'srcset' }); }
-    }
-  }
-  // data-src / data-original (lazy load)
-  for (const attr of ['data-src', 'data-original', 'data-lazy-src']) {
-    const re = new RegExp(`<img[^>]+?${attr}\\s*=\\s*["']([^"']+)["']`, 'gi');
-    for (const m of html.matchAll(re)) {
-      const u = resolveUrl(m[1], baseUrl);
-      if (u && !seen.has(u)) { seen.add(u); candidates.push({ url: u, source: attr }); }
-    }
-  }
-  // <source srcset> in <picture>
-  for (const m of html.matchAll(/<source[^>]+?srcset\s*=\s*["']([^"']+)["']/gi)) {
-    for (const part of m[1].split(',')) {
-      const u = resolveUrl(part.trim().split(/\s+/)[0], baseUrl);
-      if (u && !seen.has(u)) { seen.add(u); candidates.push({ url: u, source: 'picture/srcset' }); }
-    }
-  }
-  // CSS background-image in inline style
-  for (const m of html.matchAll(/background(?:-image)?\s*:\s*url\(["']?([^)"']+)["']?\)/gi)) {
-    const u = resolveUrl(m[1], baseUrl);
-    if (u && !seen.has(u)) { seen.add(u); candidates.push({ url: u, source: 'bg-css' }); }
-  }
-  // og:image meta
-  for (const m of html.matchAll(/<meta[^>]+?property\s*=\s*["']og:image["'][^>]*?content\s*=\s*["']([^"']+)["']/gi)) {
-    const u = resolveUrl(m[1], baseUrl);
-    if (u && !seen.has(u)) { seen.add(u); candidates.push({ url: u, source: 'og:image' }); }
-  }
-  // favicon
-  for (const m of html.matchAll(/<link[^>]+?rel\s*=\s*["'](?:icon|apple-touch-icon|shortcut icon)[^"']*["'][^>]*?href\s*=\s*["']([^"']+)["']/gi)) {
-    const u = resolveUrl(m[1], baseUrl);
-    if (u && !seen.has(u)) { seen.add(u); candidates.push({ url: u, source: 'favicon' }); }
-  }
-
-  return candidates;
+  for(const m of html.matchAll(/<source[^>]+?srcset\s*=\s*["']([^"']+)["']/gi))for(const p of m[1].split(','))add(p.trim().split(/\s+/)[0],'picture');
+  for(const m of html.matchAll(/background(?:-image)?\s*:\s*url\(["']?([^)"']+)["']?\)/gi))add(m[1],'bg-css');
+  return out;
 }
 
-// ── Check a single image (client-side via Image object) ─────────
-function checkImage(url, timeoutMs = 10000) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    const timer = setTimeout(() => {
-      img.src = '';
-      resolve({ url, status: 'timeout', label: 'TIMEOUT', cls: 'warn', icon: '⏱️', error: 'Request timeout' });
-    }, timeoutMs);
-
-    img.onload = () => {
-      clearTimeout(timer);
-      const w = img.naturalWidth, h = img.naturalHeight;
-      // Check if it's a 1x1 tracking pixel or suspiciously tiny
-      if (w === 1 && h === 1) {
-        resolve({ url, status: 'loaded', label: '1×1 PIXEL', cls: 'warn', icon: '⚠️', width: w, height: h, note: 'Mungkin tracking pixel' });
-      } else if (w === 0 && h === 0) {
-        resolve({ url, status: 'loaded', label: '0×0', cls: 'warn', icon: '⚠️', width: w, height: h, note: 'Dimensi 0×0 — mungkin broken' });
-      } else {
-        resolve({ url, status: 'loaded', label: 'OK', cls: 'ok', icon: '✅', width: w, height: h });
-      }
-    };
-
-    img.onerror = () => {
-      clearTimeout(timer);
-      resolve({ url, status: 'error', label: 'BROKEN', cls: 'error', icon: '❌', error: 'Gambar gagal dimuat (404/500/blocked)' });
-    };
-
-    img.src = url;
+// ── Check images client-side (batch) ──
+function checkImage(url,timeout=10000){
+  return new Promise(resolve=>{
+    const img=new Image();
+    const t=setTimeout(()=>{img.src='';resolve({status:'timeout',cls:'warn'})},timeout);
+    img.onload=()=>{clearTimeout(t);resolve({status:'ok',cls:img.naturalWidth===0&&img.naturalHeight===0?'warn':'ok',w:img.naturalWidth,h:img.naturalHeight})};
+    img.onerror=()=>{clearTimeout(t);resolve({status:'broken',cls:'error'})};
+    img.src=url;
   });
 }
 
-// ── Batch check with progress ───────────────────────────────────
-async function checkAllImages(candidates, onProgress) {
-  const results = [];
-  const total = candidates.length;
-
-  // Process in batches of 8 concurrent
-  const BATCH = 8;
-  for (let i = 0; i < total; i += BATCH) {
-    const batch = candidates.slice(i, i + BATCH);
-    const batchResults = await Promise.all(batch.map(c => checkImage(c.url, 12000)));
-    for (const r of batchResults) {
-      // Attach source info
-      const original = candidates.find(c => c.url === r.url);
-      if (original) r.source = original.source;
-      results.push(r);
-    }
-    if (onProgress) onProgress(Math.min(i + BATCH, total), total);
+async function checkImages(candidates,onProgress){
+  const results=[];
+  for(let i=0;i<candidates.length;i+=6){
+    const batch=candidates.slice(i,i+6);
+    const br=await Promise.all(batch.map(c=>checkImage(c.url,12000)));
+    for(let j=0;j<batch.length;j++)results.push({...batch[j],...br[j]});
+    if(onProgress)onProgress(Math.min(i+6,candidates.length),candidates.length);
   }
   return results;
 }
 
-// ── UI ──────────────────────────────────────────────────────────
-function renderRecents() {
-  const el = $('#recentLinks');
-  if (!recents.length) { el.innerHTML = '<span>Belum ada riwayat</span>'; return; }
-  el.innerHTML = '<span>Terakhir:</span> ' + recents.slice(0, 8).map(u =>
-    `<a onclick="loadRecent('${u.replace(/'/g,"\\'")}')">${truncateUrl(u, 40)}</a>`
-  ).join(' · ');
+// ── UI ─────────────────────────────────────────
+function renderRecents(){
+  const el=$('#recentLinks');
+  if(!recents.length){el.innerHTML='<span>Belum ada riwayat</span>';return}
+  el.innerHTML='<span>Terakhir:</span> '+recents.slice(0,8).map(u=>`<a onclick="loadRecent('${u.replace(/'/g,"\\'")}')">${trunc(u,38)}</a>`).join(' · ');
 }
+function addRecent(url){recents=[url,...recents.filter(u=>u!==url)].slice(0,20);localStorage.setItem('lc_recents',JSON.stringify(recents));renderRecents()}
+function loadRecent(url){$('#urlInput').value=url;doCheck()}
+function trunc(u,m){return u.length>m?u.slice(0,m)+'…':u}
+function fmtSize(b){if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(1)+' MB'}
+function escHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 
-function addRecent(url) {
-  recents = [url, ...recents.filter(u => u !== url)].slice(0, 20);
-  localStorage.setItem('lc_recents', JSON.stringify(recents));
-  renderRecents();
-}
+async function doCheck(){
+  const raw=$('#urlInput').value.trim();
+  if(!raw)return;
+  hide('results');hide('errorBox');
+  $('#checkBtn').disabled=true;
+  show('loading');$('#loadingText').textContent='Mengambil halaman…';$('#progressBar').style.width='8%';
 
-function loadRecent(url) { $('#urlInput').value = url; doCheck(); }
-function truncateUrl(u, max) { return u.length > max ? u.slice(0, max) + '…' : u; }
-
-function hide(id) { $(id).classList.remove('active'); }
-function show(id) { $(id).classList.add('active'); }
-
-async function doCheck() {
-  const raw = $('#urlInput').value.trim();
-  if (!raw) return;
-
-  hide('results'); hide('errorBox');
-  $('#checkBtn').disabled = true;
-  $('#loading').classList.add('active');
-  $('#loadingText').textContent = 'Mengambil halaman via proxy…';
-  $('#progressBar').style.width = '5%';
-
-  let url = raw;
-  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-
-  let baseUrl, html;
-  try {
-    baseUrl = new URL(url);
-    html = await fetchViaProxy(url);
-    $('#progressBar').style.width = '25%';
-    $('#loadingText').textContent = 'Menganalisa HTML & mengekstrak gambar…';
-  } catch (err) {
-    showError('Gagal mengambil halaman', err.message + '\n\nTips: pastikan URL benar, atau coba lagi nanti (proxy mungkin rate-limited).');
-    $('#loading').classList.remove('active');
-    $('#checkBtn').disabled = false;
-    return;
+  let url=raw;
+  if(!/^https?:\/\//i.test(url))url='https://'+url;
+  let baseUrl,html;
+  try{
+    baseUrl=new URL(url);
+    html=await fetchViaProxy(url);
+    $('#progressBar').style.width='30%';
+    $('#loadingText').textContent='Menjalankan audit…';
+  }catch(e){
+    showError('Gagal mengambil halaman',e.message+'\n\nTips: Cek URL atau coba lagi (proxy mungkin rate-limited).');
+    hide('loading');$('#checkBtn').disabled=false;return;
   }
 
-  let candidates = extractImageUrls(html, url);
+  // Run audit
+  auditData=runAudit(html,url);
+  $('#progressBar').style.width='50%';
 
-  // Deduplicate
-  const deduped = [];
-  const seenUrls = new Set();
-  for (const c of candidates) {
-    if (!seenUrls.has(c.url) && deduped.length < 200) {
-      seenUrls.add(c.url);
-      deduped.push(c);
+  // Check images live
+  $('#loadingText').textContent='Memeriksa gambar…';
+  const allCandidates=auditData.sections.find(s=>s.id==='images')?.imgCandidates||[];
+  if(allCandidates.length>0){
+    const imgResults=await checkImages(allCandidates,(done,total)=>{
+      const pct=50+Math.round((done/total)*45);
+      $('#progressBar').style.width=pct+'%';
+      $('#loadingText').textContent=`Memeriksa gambar… ${done}/${total}`;
+    });
+
+    // Add image results to image findings
+    const broken=imgResults.filter(r=>r.cls==='error');
+    const timedOut=imgResults.filter(r=>r.status==='timeout');
+    const zeroDim=imgResults.filter(r=>r.cls==='warn'&&r.status==='ok');
+    const imgSection=auditData.sections.find(s=>s.id==='images');
+    if(broken.length>0){
+      imgSection.findings.push({sev:'error',title:`${broken.length} gambar BROKEN!`,desc:'Gambar gagal dimuat (404, 500, atau diblokir server). Ini masalah serius yang harus diperbaiki.',badge:'ERROR',brokenUrls:broken.map(r=>r.url),count:broken.length});
     }
+    if(timedOut.length>0){
+      imgSection.findings.push({sev:'warn',title:`${timedOut.length} gambar timeout`,desc:'Gambar terlalu lama merespon (>12 detik). Mungkin server lambat atau gambar terlalu besar.',badge:'WARNING',count:timedOut.length});
+    }
+    if(zeroDim.length>0){
+      imgSection.findings.push({sev:'warn',title:`${zeroDim.length} gambar berdimensi 0×0`,desc:'Gambar termuat tapi dimensinya 0×0 — kemungkinan gambar corrupt atau SVG tanpa viewBox.',badge:'WARNING',count:zeroDim.length});
+    }
+    // Recalculate score
+    const allF=auditData.sections.flatMap(s=>s.findings);
+    const errC=allF.filter(f=>f.sev==='error').length;
+    const warnC=allF.filter(f=>f.sev==='warn').length;
+    const okC=allF.filter(f=>f.sev==='ok').length;
+    const infoC=allF.filter(f=>f.sev==='info').length;
+    const totalPenalty=errC*3+warnC*2+infoC*1;
+    const maxPenalty=(errC+warnC+infoC+okC)*3;
+    auditData.score=totalPenalty>0?Math.max(0,Math.round(100-(totalPenalty/maxPenalty)*100)):100;
+    auditData.summary={errCount:errC,warnCount:warnC,okCount:okC,infoCount:infoC,totalImgs:allCandidates.length,allLinks:auditData.summary.allLinks};
   }
 
-  if (deduped.length === 0) {
-    allResults = [];
-    addRecent(url);
-    renderResults({ url, ok: 0, broken: 0, warn: 0, total: 0 });
-    $('#loading').classList.remove('active');
-    $('#checkBtn').disabled = false;
-    return;
-  }
-
-  $('#progressBar').style.width = '30%';
-  $('#loadingText').textContent = `Memeriksa ${deduped.length} gambar…`;
-
-  const results = await checkAllImages(deduped, (done, total) => {
-    const pct = 30 + Math.round((done / total) * 65);
-    $('#progressBar').style.width = pct + '%';
-    $('#loadingText').textContent = `Memeriksa gambar… ${done}/${total}`;
-  });
-
-  $('#progressBar').style.width = '100%';
-  allResults = results;
+  $('#progressBar').style.width='100%';
   addRecent(url);
-
-  const ok = results.filter(r => r.cls === 'ok').length;
-  const broken = results.filter(r => r.cls === 'error').length;
-  const warn = results.filter(r => r.cls === 'warn').length;
-
-  renderResults({ url, ok, broken, warn, total: results.length });
-  $('#loading').classList.remove('active');
-  $('#checkBtn').disabled = false;
+  renderResults(auditData);
+  hide('loading');$('#checkBtn').disabled=false;
 }
 
-function showError(title, msg) {
-  $('#errorTitle').textContent = title;
-  $('#errorMsg').textContent = msg;
-  show('errorBox');
-}
+function showError(title,msg){$('#errorTitle').textContent=title;$('#errorMsg').textContent=msg;show('errorBox')}
 
-function renderResults(data) {
-  hide('errorBox');
-  show('results');
+function renderResults(data){
+  hide('errorBox');show('results');
 
-  $('#pageStatus').innerHTML = `🔗 Halaman: <strong>${escHtml(data.url)}</strong>`;
+  // Score
+  const s=data.score;
+  let color,text;
+  if(s>=80){color='#22c55e';text='Bagus!'}
+  else if(s>=50){color='#f59e0b';text='Cukup'}
+  else{color='#ef4444';text='Perlu Perbaikan'}
 
-  $('#statsRow').innerHTML = `
-    <div class="stat-card total"><div class="num">${data.total}</div><div class="lbl">Total Gambar</div></div>
-    <div class="stat-card ok"><div class="num">${data.ok}</div><div class="lbl">✅ OK</div></div>
-    <div class="stat-card broken"><div class="num">${data.broken}</div><div class="lbl">❌ Rusak</div></div>
-    <div class="stat-card warn"><div class="num">${data.warn}</div><div class="lbl">⚠️ Warning</div></div>
+  $('#scoreSection').innerHTML=`
+    <div class="score-circle" style="--score-pct:${s};--score-color:${color};--score-text:${color}">
+      <div class="score-inner"><div class="score-num">${s}</div><div class="score-label">/ 100</div></div>
+    </div>
+    <div class="score-text" style="color:${color}">${text}</div>
+    <div class="score-breakdown">
+      <span class="score-chip good">✅ ${data.summary.okCount} Lolos</span>
+      <span class="score-chip warn">⚠️ ${data.summary.warnCount} Warning</span>
+      <span class="score-chip bad">❌ ${data.summary.errCount} Error</span>
+      ${data.summary.infoCount>0?`<span class="score-chip" style="background:#0a1a2a;color:#818cf8">ℹ️ ${data.summary.infoCount} Info</span>`:''}
+    </div>
   `;
 
-  $('#filterTabs').innerHTML = `
-    <button class="filter-tab active" onclick="setFilter('all')">Semua (${data.total})</button>
-    <button class="filter-tab" onclick="setFilter('ok')">✅ OK (${data.ok})</button>
-    <button class="filter-tab" onclick="setFilter('error')">❌ Rusak (${data.broken})</button>
-    <button class="filter-tab" onclick="setFilter('warn')">⚠️ Warning (${data.warn})</button>
-  `;
-
-  renderImageList();
-  $('#emptyState').style.display = data.total === 0 ? 'block' : 'none';
-}
-
-function setFilter(f) {
-  currentFilter = f;
-  $$('.filter-tab').forEach((t, i) => t.classList.toggle('active', i === ['all','ok','error','warn'].indexOf(f)));
-  renderImageList();
-}
-
-function renderImageList() {
-  const filtered = currentFilter === 'all' ? allResults : allResults.filter(r => r.cls === currentFilter);
-  const list = $('#imageList');
-
-  if (!filtered.length) {
-    list.innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>Tidak ada hasil untuk filter ini</p></div>';
-    return;
-  }
-
-  list.innerHTML = filtered.map((img, i) => {
-    const dims = img.width ? `${img.width}×${img.height}` : '';
-    const meta = [img.source, dims, img.note].filter(Boolean).join(' · ');
-    const thumbHtml = img.cls === 'ok'
-      ? `<img class="img-thumb" src="${escHtml(img.url)}" loading="lazy" onerror="this.outerHTML='<div class=\\'img-thumb placeholder\\'>🖼️</div>'">`
-      : `<div class="img-thumb placeholder">${img.icon}</div>`;
+  // Sections
+  $('#findingsContainer').innerHTML=data.sections.map(sec=>{
+    const findingsHtml=sec.findings.map((f,i)=>`
+      <div class="finding" style="animation-delay:${i*0.04}s">
+        <div class="sev ${f.sev}"></div>
+        <div class="body">
+          <div class="title">${f.title}</div>
+          <div class="desc">${f.desc}</div>
+          ${f.brokenUrls?`
+            <div class="detail" style="color:#f87171">URL yang rusak:</div>
+            <div class="img-preview-row">${f.brokenUrls.slice(0,8).map(u=>`<div style="font-size:.7rem;color:#f87171;word-break:break-all">🔗 ${escHtml(trunc(u,70))}</div>`).join('')}</div>
+            ${f.brokenUrls.length>8?`<div class="detail">…dan ${f.brokenUrls.length-8} lainnya</div>`:''}
+          `:''}
+        </div>
+        <div class="badge ${f.sev}">${f.badge}</div>
+      </div>
+    `).join('');
 
     return `
-      <div class="image-item ${img.cls}" style="animation-delay:${i*0.02}s">
-        ${thumbHtml}
-        <div class="img-info">
-          <div class="img-url">${escHtml(img.url)}</div>
-          <div class="img-meta">${meta}</div>
-          ${img.error ? `<div class="img-meta" style="color:#f87171">${escHtml(img.error)}</div>` : ''}
+      <div class="section">
+        <div class="section-header">
+          <span class="icon">${sec.icon}</span><h2>${sec.title}</h2>
+          <span class="count">${sec.findings.length} temuan</span>
         </div>
-        <span class="status-badge ${img.cls}">${img.label}</span>
-        <div class="img-actions"><a href="${escHtml(img.url)}" target="_blank" rel="noopener">Buka ↗</a></div>
+        ${findingsHtml||'<div class="empty-section">Tidak ada temuan di kategori ini</div>'}
       </div>`;
   }).join('');
 }
 
-function escHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-$('#urlInput').addEventListener('keydown', e => { if (e.key === 'Enter') doCheck(); });
-
+function hide(id){$(id).classList.remove('active')}
+function show(id){$(id).classList.add('active')}
+$('#urlInput').addEventListener('keydown',e=>{if(e.key==='Enter')doCheck()});
 renderRecents();
 </script>
 </body>
