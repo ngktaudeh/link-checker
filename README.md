@@ -1,50 +1,72 @@
-# 🔍 Link Checker
+# 🔍 Link & Page Auditor
 
-**Cek gambar error, bug, atau rusak di halaman web — tinggal tempel link.**
+**Audit halaman web ala PageSpeed Insights — deteksi error, bug, dan masalah SEO/HTML lengkap dengan skor dan rekomendasi.**
 
-![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue)
+![Node.js](https://img.shields.io/badge/static-html-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue)
 
-## ✨ Fitur
+🌐 **Live:** [ngktaudeh.github.io/link-checker](https://ngktaudeh.github.io/link-checker/)
 
-- 🔗 **Tempel URL** — langsung scan semua gambar di halaman
-- 🖼️ **Deteksi multi-source** — `<img src>`, `srcset`, `data-src` (lazy load), `<picture>`, CSS `background-image`, `og:image`, favicon
-- 📊 **Kategori jelas** — ✅ OK, ❌ Rusak (404/500/gagal koneksi), ⚠️ Warning (timeout/redirect)
-- 🔍 **Filter hasil** — lihat hanya yang broken, warning, atau OK
-- 🖼️ **Thumbnail preview** — gambar OK ditampilkan thumbnail-nya
-- 📝 **Detail info** — HTTP status, content-type, content-length, redirect chain
-- 📋 **Riwayat** — URL yang pernah dicek otomatis tersimpan
-- 🌙 **Dark theme** — UI bersih, responsive mobile
+## ✨ Fitur Audit
 
-## 🚀 Live Demo
+### 📊 Skor Keseluruhan
+Skor 0-100 dengan tampilan donat ala PageSpeed, plus ringkasan Error / Warning / OK / Info.
 
-🌐 **Langsung pakai:** [ngktaudeh.github.io/link-checker](https://ngktaudeh.github.io/link-checker/)
+### 🖼️ Audit Gambar
+- Deteksi semua gambar (`<img>`, `srcset`, `data-src`, `<picture>`, CSS `background-image`)
+- Cek gambar broken/404/timeout secara real-time
+- Deteksi missing `alt` (aksesibilitas)
+- Deteksi missing `width`/`height` (CLS / layout shift)
+- Deteksi 0×0 dimensi (gambar corrupt)
 
-## 🛠️ Run Lokal
+### 🔗 Audit Tautan
+- Hitung total link (internal vs eksternal)
+- Deteksi tautan kosong (`#`, `javascript:void(0)`)
+- Cek `rel="noopener"` untuk link eksternal
 
+### 📈 SEO & Meta
+- Analisis tag `<title>` (panjang, keberadaan)
+- Meta description check (panjang optimal 120-160 karakter)
+- Viewport meta tag (mobile-friendly)
+- Open Graph tags (social sharing)
+- Heading hierarchy (H1-H4)
+- Canonical URL
+- Favicon
+- Robots meta
+
+### 🏗️ Struktur HTML
+- DOCTYPE check
+- `lang` attribute
+- Meta charset
+- Form input labels
+- Render-blocking scripts di `<head>`
+- Heading hierarchy validation
+- Inline style detection
+
+### ⚡ Performa
+- Ukuran halaman
+- Jumlah resource eksternal (JS + CSS)
+- Google Fonts detection
+- Preload hints
+
+## 🚀 Cara Pakai
+
+**Langsung online:** buka [ngktaudeh.github.io/link-checker](https://ngktaudeh.github.io/link-checker/)
+
+**Lokal:**
 ```bash
 git clone https://github.com/ngktaudeh/link-checker.git
 cd link-checker
-
-# Client-side version — langsung buka di browser:
-open docs/index.html
-
-# Atau pakai server (butuh Node.js):
-npm install && npm start
-# buka http://localhost:3456
+open docs/index.html   # atau langsung buka di browser
 ```
 
-## 🛠️ Tech Stack
+## 🛠️ Tech
 
-- **Full client-side** — gak butuh backend, jalan di GitHub Pages
-- **Vanilla HTML/CSS/JS** — zero dependencies, loading cepat
-- **CORS proxy** — auto-fallback ke multiple proxy untuk fetch halaman target
-- **Image() API** — ngecek gambar langsung dari browser, tau dimensi & load status
-- **Regex parsing** — ekstrak gambar dari `<img>`, `srcset`, `data-src`, `<picture>`, CSS background, `og:image`, favicon
-
-## 📸 Screenshot
-
-![Link Checker Screenshot](screenshot.png)
+- **100% client-side** — vanilla HTML/CSS/JS, zero dependencies
+- **Multi CORS proxy** — auto-fallback untuk fetch halaman target
+- **`Image()` API** — cek status gambar langsung dari browser
+- **Regex-based parsing** — ekstrak semua elemen tanpa library
+- **Deploy ke GitHub Pages** — gratis, CDN, SSL
 
 ## 📄 License
 
-MIT — bebas pakai, modifikasi, sebarkan.
+MIT
