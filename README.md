@@ -15,28 +15,31 @@
 - 📋 **Riwayat** — URL yang pernah dicek otomatis tersimpan
 - 🌙 **Dark theme** — UI bersih, responsive mobile
 
-## 🚀 Install & Run
+## 🚀 Live Demo
+
+🌐 **Langsung pakai:** [ngktaudeh.github.io/link-checker](https://ngktaudeh.github.io/link-checker/)
+
+## 🛠️ Run Lokal
 
 ```bash
-# Clone
-git clone https://github.com/Danielsmb/link-checker.git
+git clone https://github.com/ngktaudeh/link-checker.git
 cd link-checker
 
-# Install
-npm install
+# Client-side version — langsung buka di browser:
+open docs/index.html
 
-# Start
-npm start
+# Atau pakai server (butuh Node.js):
+npm install && npm start
+# buka http://localhost:3456
 ```
-
-Buka `http://localhost:3456` di browser.
 
 ## 🛠️ Tech Stack
 
-- **Backend:** Node.js + Express
-- **Frontend:** Vanilla HTML/CSS/JS (no framework)
-- **Parsing:** Regex-based HTML image extraction
-- **Checking:** HTTP HEAD requests dengan timeout & redirect following
+- **Full client-side** — gak butuh backend, jalan di GitHub Pages
+- **Vanilla HTML/CSS/JS** — zero dependencies, loading cepat
+- **CORS proxy** — auto-fallback ke multiple proxy untuk fetch halaman target
+- **Image() API** — ngecek gambar langsung dari browser, tau dimensi & load status
+- **Regex parsing** — ekstrak gambar dari `<img>`, `srcset`, `data-src`, `<picture>`, CSS background, `og:image`, favicon
 
 ## 📸 Screenshot
 
